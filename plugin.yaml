@@ -1,0 +1,17 @@
+schema: mcpg.dev/plugin/v1
+id: dev.mcpg.identity.api-key
+name: Static API-Key Identity Resolver
+license: Apache-2.0
+description: |
+  Resolves caller identity from a static, operator-supplied API-key
+  registry. Each registry entry maps a constant-time-compared key
+  value to a stable subject_id plus optional roles / groups /
+  scopes / attributes. Token sources (Authorization: Bearer or any
+  named header) are configurable. Pure offline lookup — no
+  outbound network. Reuses the gateway's secret-resolver so
+  operators reference key bytes via `${env.VAR}` / `vault://...` /
+  `file:///...` rather than pasting plaintext into config.
+class: identity_provider
+runtime: native-cdylib-v1
+protocol_version: "1.0"
+required_capabilities: []

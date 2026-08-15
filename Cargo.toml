@@ -1,0 +1,45 @@
+[package]
+name = "mcpg-plugin-identity-api-key"
+version = "0.1.0-alpha.15"
+license = "Apache-2.0"
+edition = "2024"
+description = "Static-registry API-key identity plugin for MCPG gateway (dev.mcpg.identity.api-key)"
+
+[lib]
+# cdylib: produces the `.so`/`.dylib` the gateway's native_loader
+# opens via `libloading` and binds through `mcpg_plugin_register`.
+# rlib: lets the workspace build + unit-test the plugin's internals
+# without producing a dylib.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+async-trait = "0.1"
+metrics = "0.24"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+# Constant-time compare for digest matching. `subtle` is workspace-
+# pulled by argon2 etc.; we use it directly to block timing
+# side-channels that a `BTreeMap::get` or naive `==` would leak.
+subtle = "2"
+thiserror = "2.0"
+# RFC3339 parsing for `expires_at`. `time` is workspace-available
+# already (jsonwebtoken / reqwest pull it transitively); using it
+# directly avoids the `chrono` weight.
+time = { version = "0.3", features = ["parsing", "macros", "serde"] }
+tracing = "0.1"
+
+[features]
+# Default ON so standalone `cargo build -p <this>` produces a
+# working cdylib with the `mcpg_plugin_register` symbol exported.
+# Disabled by callers that link the plugin as an rlib path-dep
+# (avoids the multi-plugin linker collision).
+default = ["cdylib-export"]
+cdylib-export = []
+# Declared so the SDK's `declare_identity_plugin!` `build_static`
+# accessor (gated `#[cfg(feature = "static-firstparty")]`) does not
+# trigger `unexpected_cfgs` in consumer compilation. Empty: this plugin
+# is consumed as a cdylib, not via the static-firstparty fast path.
+static-firstparty = []
