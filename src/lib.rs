@@ -68,7 +68,7 @@ fn record_resolve_outcome(result: &IdentityResolution, elapsed: std::time::Durat
             elapsed_ms = %elapsed.as_millis(),
             "api-key identity: no token — fall through"
         ),
-        IdentityResolution::Invalid { reason } => warn!(
+        IdentityResolution::Invalid { reason, .. } => warn!(
             reason = %reason,
             elapsed_ms = %elapsed.as_millis(),
             "api-key identity: invalid token"
@@ -227,6 +227,7 @@ fn resolve_with_now(
     if hits == 0 {
         return IdentityResolution::Invalid {
             reason: "unknown key".into(),
+            response_headers: Vec::new(),
         };
     }
     if hits > 1 {
@@ -240,6 +241,7 @@ fn resolve_with_now(
         );
         return IdentityResolution::Invalid {
             reason: "internal error: digest collision".into(),
+            response_headers: Vec::new(),
         };
     }
     let entry = matched.expect("hits >= 1 implies matched is Some");
@@ -247,6 +249,7 @@ fn resolve_with_now(
     if !entry.enabled {
         return IdentityResolution::Invalid {
             reason: "key disabled".into(),
+            response_headers: Vec::new(),
         };
     }
     if let Some(expires_at) = entry.expires_at
@@ -254,6 +257,7 @@ fn resolve_with_now(
     {
         return IdentityResolution::Invalid {
             reason: "key expired".into(),
+            response_headers: Vec::new(),
         };
     }
 
@@ -565,7 +569,7 @@ mod tests {
         )];
         let r = resolve_with_now(&plugin.inner, &headers, now_2026());
         match r {
-            IdentityResolution::Invalid { reason } => assert_eq!(reason, "unknown key"),
+            IdentityResolution::Invalid { reason, .. } => assert_eq!(reason, "unknown key"),
             other => panic!("expected Invalid, got {other:?}"),
         }
     }
@@ -576,7 +580,7 @@ mod tests {
         let headers = vec![("X-Api-Key".into(), good_secret_b().into())];
         let r = resolve_with_now(&plugin.inner, &headers, now_2026());
         match r {
-            IdentityResolution::Invalid { reason } => assert_eq!(reason, "key disabled"),
+            IdentityResolution::Invalid { reason, .. } => assert_eq!(reason, "key disabled"),
             other => panic!("expected Invalid, got {other:?}"),
         }
     }
@@ -606,7 +610,7 @@ mod tests {
         )];
         let r = resolve_with_now(&plugin.inner, &headers, now_2026());
         match r {
-            IdentityResolution::Invalid { reason } => assert_eq!(reason, "key expired"),
+            IdentityResolution::Invalid { reason, .. } => assert_eq!(reason, "key expired"),
             other => panic!("expected Invalid, got {other:?}"),
         }
     }
@@ -680,7 +684,7 @@ mod tests {
         let headers = vec![("X-Api-Key".into(), candidate)];
         let r = resolve_with_now(&plugin.inner, &headers, now_2026());
         match r {
-            IdentityResolution::Invalid { reason } => assert_eq!(reason, "unknown key"),
+            IdentityResolution::Invalid { reason, .. } => assert_eq!(reason, "unknown key"),
             other => panic!("expected Invalid, got {other:?}"),
         }
     }
