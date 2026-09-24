@@ -1,6 +1,6 @@
 [package]
 name = "mcpg-plugin-identity-api-key"
-version = "0.1.0-alpha.31"
+version = "0.1.0-alpha.37"
 license = "Apache-2.0"
 edition = "2024"
 description = "Static-registry API-key identity plugin for MCPG gateway (dev.mcpg.identity.api-key)"
@@ -13,13 +13,13 @@ description = "Static-registry API-key identity plugin for MCPG gateway (dev.mcp
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.29", version = "=0.1.0-beta.29" }
-mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.30", version = "=0.1.0-beta.30" }
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.35", version = "=0.1.0-beta.35" }
+mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.36", version = "=0.1.0-beta.36" }
 async-trait = "0.1"
 metrics = "0.24"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-sha2 = "0.10"
+sha2 = "0.11"
 # Constant-time compare for digest matching. `subtle` is workspace-
 # pulled by argon2 etc.; we use it directly to block timing
 # side-channels that a `BTreeMap::get` or naive `==` would leak.
